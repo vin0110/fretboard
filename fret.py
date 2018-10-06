@@ -13,65 +13,24 @@ Roots = ['E', 'B', 'G', 'D', 'A', 'E']
 Notes = ['A', 'Bb', 'B', 'C', 'Db', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'G#']
 nNotes = len(Notes)
 
+nextNote = lambda note, plus:\
+           Notes[(Notes.index(note.title()) + plus) % nNotes]
+
 Major = [
-    ('A', 'Db', 'E', ),
-    ('Bb', 'D', 'F', ),
-    ('B', 'Eb', 'F#', ),
-    ('C', 'E', 'G', ),
-    ('Db', 'F', 'G#', ),
-    ('D', 'F#', 'A', ),
-    ('Eb', 'G', 'Bb', ),
-    ('E', 'G#', 'B', ),
-    ('F', 'A', 'C', ),
-    ('F#', 'Bb', 'Db', ),
-    ('G', 'B', 'D', ),
-    ('G#', 'C', 'Eb', ),
-]
+    (Notes[i], nextNote(Notes[i], 4), nextNote(Notes[i], 7), )
+    for i in range(nNotes)]
 
 Minor = [
-    ('A', 'C', 'E', ),
-    ('Bb', 'Db', 'F', ),
-    ('B', 'D', 'F#', ),
-    ('C', 'Eb', 'G', ),
-    ('Db', 'E', 'G#', ),
-    ('D', 'F#]', 'A', ),
-    ('Eb', 'F#', 'Bb', ),
-    ('E', 'G', 'B', ),
-    ('F', 'G#', 'C', ),
-    ('F#', 'A', 'Db', ),
-    ('G', 'Bb', 'D', ),
-    ('G#', 'B', 'Eb', ),
-]
+    (Notes[i], nextNote(Notes[i], 3), nextNote(Notes[i], 7), )
+    for i in range(nNotes)]
 
 Seventh = [
-    ('A', 'Db', 'E', 'G', ),
-    ('Bb', 'D', 'F', 'G#', ),
-    ('B', 'Eb', 'F#', 'A', ),
-    ('C', 'E', 'G', 'Bb', ),
-    ('Db', 'F', 'G#', 'B', ),
-    ('D', 'F#', 'A', 'C', ),
-    ('Eb', 'G', 'Bb', 'Db', ),
-    ('E', 'G#', 'B', 'D', ),
-    ('F', 'A', 'C', 'Eb', ),
-    ('F#', 'Bb', 'Db', 'E', ),
-    ('G', 'B', 'D', 'F', ),
-    ('G#', 'C', 'Eb', 'F#', ),
-]
+    (Notes[i], nextNote(Notes[i], 4), nextNote(Notes[i], 7),
+     nextNote(Notes[i], 10), ) for i in range(nNotes)]
 
 Aug = [
-    ('A', 'Db', 'F', ),
-    ('Bb', 'D', 'F#', ),
-    ('B', 'Eb', 'G', ),
-    ('C', 'E', 'G#', ),
-    ('Db', 'F', 'A', ),
-    ('D', 'F#', 'Bb', ),
-    ('Eb', 'G', 'B', ),
-    ('E', 'G#', 'C', ),
-    ('F', 'A', 'Db', ),
-    ('F#', 'Bb', 'D', ),
-    ('G', 'B', 'Eb', ),
-    ('G#', 'C', 'E', ),
-]
+    (Notes[i], nextNote(Notes[i], 4), nextNote(Notes[i], 8), )
+    for i in range(nNotes)]
 
 
 def getNotes(pnotes, offset, frets):
