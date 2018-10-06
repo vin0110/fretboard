@@ -15,22 +15,15 @@ nNotes = len(Notes)
 
 nextNote = lambda note, plus:\
            Notes[(Notes.index(note.title()) + plus) % nNotes]
-
-Major = [
-    (Notes[i], nextNote(Notes[i], 4), nextNote(Notes[i], 7), )
-    for i in range(nNotes)]
-
-Minor = [
-    (Notes[i], nextNote(Notes[i], 3), nextNote(Notes[i], 7), )
-    for i in range(nNotes)]
-
-Seventh = [
-    (Notes[i], nextNote(Notes[i], 4), nextNote(Notes[i], 7),
-     nextNote(Notes[i], 10), ) for i in range(nNotes)]
-
-Aug = [
-    (Notes[i], nextNote(Notes[i], 4), nextNote(Notes[i], 8), )
-    for i in range(nNotes)]
+majorNotes = lambda n:\
+             (Notes[n], Notes[(n+4)%nNotes], Notes[(n+7)%nNotes], )
+minorNotes = lambda n:\
+             (Notes[n], Notes[(n+3)%nNotes], Notes[(n+7)%nNotes], )
+seventhNotes = lambda n:\
+               (Notes[n], Notes[(n+4)%nNotes], Notes[(n+7)%nNotes],
+                Notes[(n+10)%nNotes], )
+augNotes = lambda n:\
+           (Notes[n], Notes[(n+4)%nNotes], Notes[(n+8)%nNotes], )
 
 
 def getNotes(pnotes, offset, frets):
@@ -109,16 +102,17 @@ def main():
         except ValueError:
             parser.error('unknown chord "{}"'.format(args.notes[0]))
         if nflags == 0 or args.major:
-            args.notes = Major[idx]
+            args.notes = majorNotes(idx)
+            print('n', idx, args.notes)
             sup = 'Maj'
         elif args.minor:
-            args.notes = Minor[idx]
+            args.notes = minorNotes(idx)
             sup = 'Min'
         elif args.seventh:
-            args.notes = Seventh[idx]
+            args.notes = seventhNotes(idx)
             sup = '7'
         elif args.aug:
-            args.notes = Aug[idx]
+            args.notes = augNotes(idx)
             sup = 'Aug'
         print('Chord: {}{} -- {}\n'.format(chord, sup, ', '.join(args.notes)))
     elif args.scale:
