@@ -10,7 +10,8 @@ __author__ = "VW Freeh"
 import argparse
 
 Roots = ['E', 'B', 'G', 'D', 'A', 'E']
-Notes = ['A', 'Bb', 'B', 'C', 'Db', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'G#']
+Notes = ['A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#']
+bNotes = ['A', 'Bb', 'B', 'C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab']
 nNotes = len(Notes)
 
 nextNote = lambda note, plus:\
@@ -80,13 +81,20 @@ def main():
     parser.add_argument('--aug', action='store_true', default=False,
                         help='in chord mode: show augmented')
     parser.add_argument('--scale', action='store_true', default=False,
-                        help='set scale mode: show pentatonic scale '
+                        help='set scale mode: show diatonic scale '
                         '(default is note)')
+    parser.add_argument('--pentatonic', '--pent',
+                        action='store_true', default=False,
+                        help='show pentatonic scale '
+                        '(default is diatonic)')
     parser.add_argument('notes', type=str, action='store', nargs="*")
 
     args = parser.parse_args()
     if args.chord and args.scale:
         raise parser.error('select either "chord" or "scale" not both')
+
+    if args.pentatonic:
+        args.scale = True
 
     nflags = sum([args.major, args.minor, args.seventh, args.aug])
     if args.chord:
@@ -100,7 +108,10 @@ def main():
         try:
             idx = Notes.index(chord)
         except ValueError:
-            parser.error('unknown chord "{}"'.format(args.notes[0]))
+            try:
+                idx = bNotes.index(chord)
+            except ValueError:
+                parser.error('unknown chord "{}"'.format(args.notes[0]))
         if nflags == 0 or args.major:
             args.notes = majorNotes(idx)
             print('n', idx, args.notes)
@@ -123,16 +134,33 @@ def main():
         try:
             idx = Notes.index(scale)
         except ValueError:
-            parser.error('unknown note "{}"'.format(args.notes[0]))
-        # pentatonic scale
-        # Root, +3, +2, +2, +3
-        args.notes = [
-            Notes[idx],
-            Notes[(idx + 3) % nNotes],
-            Notes[(idx + 5) % nNotes],
-            Notes[(idx + 7) % nNotes],
-            Notes[(idx + 10) % nNotes],
-        ]
+            try:
+                idx = bNotes.index(scale)
+            except ValueError:
+                parser.error('unknown note "{}"'.format(args.notes[0]))
+        if args.pentatonic:
+            # pentatonic scale
+            # Root, +3, +2, +2, +3
+            args.notes = [
+                Notes[idx],
+                Notes[(idx + 3) % nNotes],
+                Notes[(idx + 5) % nNotes],
+                Notes[(idx + 7) % nNotes],
+                Notes[(idx + 10) % nNotes],
+            ]
+        else:
+            # diatonic scale
+            # Root, +2, +2, +1, +2 +2, +2
+            args.notes = [
+                Notes[idx],
+                Notes[(idx + 2) % nNotes],
+                Notes[(idx + 4) % nNotes],
+                Notes[(idx + 5) % nNotes],
+                Notes[(idx + 7) % nNotes],
+                Notes[(idx + 9) % nNotes],
+                Notes[(idx + 11) % nNotes],
+            ]
+
         print('Scale: {} -- {}\n'.format(scale, ', '.join(args.notes)))
     elif args.notes == []:
         # no notes given. show all notes
