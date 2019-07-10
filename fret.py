@@ -138,6 +138,7 @@ def main():
             except ValueError:
                 parser.error('unknown note "{}"'.format(args.notes[0]))
         if args.pentatonic:
+            adjective = 'Pentatonic'
             if args.major:
                 # major pentatonic scale
                 # Root, +2, +2, +3, +2
@@ -148,6 +149,7 @@ def main():
                     Notes[(idx + 7) % nNotes],
                     Notes[(idx + 9) % nNotes],
                 ]
+                adjective = 'Major ' + adjective
             else:
                 # minor pentatonic scale
                 # Root, +3, +2, +2, +3
@@ -158,7 +160,9 @@ def main():
                     Notes[(idx + 7) % nNotes],
                     Notes[(idx + 10) % nNotes],
                 ]
+                adjective = 'Minor ' + adjective
         else:
+            adjective = "Diatonic"
             if args.minor:
                 # minor diatonic scale
                 # Root, +2, +1, +2, +2 +1, +2
@@ -171,6 +175,7 @@ def main():
                     Notes[(idx + 8) % nNotes],
                     Notes[(idx + 10) % nNotes],
                 ]
+                adjective = 'Minor ' + adjective
             else:                
                 # major diatonic scale
                 # Root, +2, +2, +1, +2 +2, +2
@@ -183,8 +188,10 @@ def main():
                     Notes[(idx + 9) % nNotes],
                     Notes[(idx + 11) % nNotes],
                 ]
+                adjective = 'Major ' + adjective
 
-        print('Scale: {} -- {}\n'.format(scale, ', '.join(args.notes)))
+        print('{} Scale: {} -- {}\n'.format(
+            adjective, scale, ', '.join(args.notes)))
     elif args.notes == []:
         # no notes given. show all notes
         args.notes = Notes
