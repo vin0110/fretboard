@@ -73,7 +73,7 @@ def showTriads(root_name):
 
     print('Triads for {}'.format(root_name))
     fret_str = ["%-2d" % (i, ) for i in range(frets)]
-    fret_str[root] = root_name + " "
+    fret_str[root] = "{:2s}".format(root_name)
     print("|".join([' {} '.format(i) for i in fret_str]))
     print('+'.join(['-'*4]*frets))
 
@@ -115,7 +115,7 @@ def showCaged(root_name):
     root = (Notes.index(root_name) + 5) % 12 # set for the lo E string
     c = (root + 4) % 12
     a = (root + 7) % 12
-    g = (root + 10) % 12
+    g = (root + 9) % 12
     e = (root) % 12
     d = (root + 2) % 12
     if c == 0: c = 12
@@ -137,7 +137,10 @@ def showCaged(root_name):
     notes[c][0] = "C"
     notes[a][0] = "A"
     notes[g+3][0] = "G"
-    notes[e][0] = "E"
+    if notes[e][0] == ' ':
+        notes[e][0] = "E"
+    else:
+        notes[e][1] = "E"
     if notes[d+2][0] == ' ':
         notes[d+2][0] = "D"
     else:
@@ -149,7 +152,10 @@ def showCaged(root_name):
     notes = [[' ']* 2 for i in range(frets)]
     notes[c+1][0] = "C"
     notes[a+2][0] = "A"
-    notes[g][0] = "G"
+    if notes[g][0] == ' ':
+        notes[g][0] = "G"
+    else:
+        notes[g][1] = "G"
     notes[e][0] = "E"
     if notes[d+3][0] == ' ':
         notes[d+3][0] = "D"
@@ -161,7 +167,10 @@ def showCaged(root_name):
     notes = [[' ']* 2 for i in range(frets)]
     notes[c][0] = "C"
     notes[a+2][0] = "A"
-    notes[g][0] = "G"
+    if notes[g][0] == ' ':
+        notes[g][0] = "G"
+    else:
+        notes[g][1] = "G"
     notes[e+1][0] = "E"
     if notes[d+2][0] == ' ':
         notes[d+2][0] = "D"
@@ -174,7 +183,10 @@ def showCaged(root_name):
     notes = [[' ']* 2 for i in range(frets)]
     notes[c+2][0] = "C"
     notes[a+2][0] = "A"
-    notes[g][0] = "G"
+    if notes[g][0] == ' ':
+        notes[g][0] = "G"
+    else:
+        notes[g][1] = "G"
     notes[e+2][0] = "E"
     if notes[d][0] == ' ':
         notes[d][0] = "D"
@@ -198,7 +210,10 @@ def showCaged(root_name):
     notes = ['  '] * frets
     notes = [[' ']* 2 for i in range(frets)]
     notes[g+3][0] = "G"
-    notes[e][0] = "E"
+    if notes[e][0] == ' ':
+        notes[e][0] = "E"
+    else:
+        notes[e][1] = "E"
     print("|".join([' {}{} '.format(*note) for note in notes]))
     
 
