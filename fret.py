@@ -67,26 +67,25 @@ def main():
     '''
 
     parser = argparse.ArgumentParser(description=main.__doc__)
-    parser.add_argument('-f', '--frets', type=int, default=13,
-                        help='select number of frets (default=13)')
+    parser.add_argument('-f', '--frets', type=int, default=12,
+                        help='select number of frets (default=12)')
     parser.add_argument('-c', '--chord', action='store_true', default=False,
-                        help='set chord mode (default is note)')
+                        help='show all notes in given chord')
     parser.add_argument('--major', '--maj', action='store_true', default=False,
-                        help='in chord mode: show major (the default)')
+                        help='show major (the default for chord)')
     parser.add_argument('--minor', '--min', action='store_true', default=False,
-                        help='in chord mode:  show minor')
+                        help='show minor(default for pentatonic')
     parser.add_argument('--seventh', '--7', action='store_true',
                         default=False,
                         help='in chord mode: show major 7th')
     parser.add_argument('--aug', action='store_true', default=False,
                         help='in chord mode: show augmented')
     parser.add_argument('--scale', action='store_true', default=False,
-                        help='set scale mode: show diatonic scale '
-                        '(default is note)')
+                        help='show diatonic scale ')
     parser.add_argument('--pentatonic', '--pent',
                         action='store_true', default=False,
                         help='show pentatonic scale '
-                        '(default is diatonic)')
+                        '(default is minor scale; use --major to change)')
     parser.add_argument('notes', type=str, action='store', nargs="*")
 
     args = parser.parse_args()
@@ -139,27 +138,51 @@ def main():
             except ValueError:
                 parser.error('unknown note "{}"'.format(args.notes[0]))
         if args.pentatonic:
-            # pentatonic scale
-            # Root, +3, +2, +2, +3
-            args.notes = [
-                Notes[idx],
-                Notes[(idx + 3) % nNotes],
-                Notes[(idx + 5) % nNotes],
-                Notes[(idx + 7) % nNotes],
-                Notes[(idx + 10) % nNotes],
-            ]
+            if args.major:
+                # major pentatonic scale
+                # Root, +2, +2, +3, +2
+                args.notes = [
+                    Notes[idx],
+                    Notes[(idx + 2) % nNotes],
+                    Notes[(idx + 4) % nNotes],
+                    Notes[(idx + 7) % nNotes],
+                    Notes[(idx + 9) % nNotes],
+                ]
+            else:
+                # minor pentatonic scale
+                # Root, +3, +2, +2, +3
+                args.notes = [
+                    Notes[idx],
+                    Notes[(idx + 3) % nNotes],
+                    Notes[(idx + 5) % nNotes],
+                    Notes[(idx + 7) % nNotes],
+                    Notes[(idx + 10) % nNotes],
+                ]
         else:
-            # diatonic scale
-            # Root, +2, +2, +1, +2 +2, +2
-            args.notes = [
-                Notes[idx],
-                Notes[(idx + 2) % nNotes],
-                Notes[(idx + 4) % nNotes],
-                Notes[(idx + 5) % nNotes],
-                Notes[(idx + 7) % nNotes],
-                Notes[(idx + 9) % nNotes],
-                Notes[(idx + 11) % nNotes],
-            ]
+            if args.minor:
+                # minor diatonic scale
+                # Root, +2, +1, +2, +2 +1, +2
+                args.notes = [
+                    Notes[idx],
+                    Notes[(idx + 2) % nNotes],
+                    Notes[(idx + 3) % nNotes],
+                    Notes[(idx + 5) % nNotes],
+                    Notes[(idx + 7) % nNotes],
+                    Notes[(idx + 8) % nNotes],
+                    Notes[(idx + 10) % nNotes],
+                ]
+            else:                
+                # major diatonic scale
+                # Root, +2, +2, +1, +2 +2, +2
+                args.notes = [
+                    Notes[idx],
+                    Notes[(idx + 2) % nNotes],
+                    Notes[(idx + 4) % nNotes],
+                    Notes[(idx + 5) % nNotes],
+                    Notes[(idx + 7) % nNotes],
+                    Notes[(idx + 9) % nNotes],
+                    Notes[(idx + 11) % nNotes],
+                ]
 
         print('Scale: {} -- {}\n'.format(scale, ', '.join(args.notes)))
     elif args.notes == []:
