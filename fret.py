@@ -8,6 +8,8 @@ Shows notes on the guitar. Three major modes: (1) individual notes;
 __author__ = "VW Freeh"
 
 import argparse
+from random import randint
+
 
 Roots = ['E', 'B', 'G', 'D', 'A', 'E']
 Notes = ['A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#']
@@ -15,16 +17,16 @@ bNotes = ['A', 'Bb', 'B', 'C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab']
 nNotes = len(Notes)
 
 nextNote = lambda note, plus:\
-           Notes[(Notes.index(note.title()) + plus) % nNotes]
+    Notes[(Notes.index(note.title()) + plus) % nNotes]
 majorNotes = lambda n:\
-             (Notes[n], Notes[(n+4) % nNotes], Notes[(n+7) % nNotes], )
+    (Notes[n], Notes[(n+4) % nNotes], Notes[(n+7) % nNotes], )
 minorNotes = lambda n:\
-             (Notes[n], Notes[(n+3) % nNotes], Notes[(n+7) % nNotes], )
+    (Notes[n], Notes[(n+3) % nNotes], Notes[(n+7) % nNotes], )
 seventhNotes = lambda n:\
-               (Notes[n], Notes[(n+4) % nNotes], Notes[(n+7) % nNotes],
-                Notes[(n+10) % nNotes], )
+    (Notes[n], Notes[(n+4) % nNotes], Notes[(n+7) % nNotes],
+     Notes[(n+10) % nNotes], )
 augNotes = lambda n:\
-           (Notes[n], Notes[(n+4) % nNotes], Notes[(n+8) % nNotes], )
+    (Notes[n], Notes[(n+4) % nNotes], Notes[(n+8) % nNotes], )
 
 
 def getNotes(pnotes, offset, frets):
@@ -286,6 +288,49 @@ def box(args):
         print("|".join([' {}  '.format(note) for note in string]))
 
 
+def playNoteGame(args):
+    '''play guess that note'''
+    def showBoard(string, fret):
+        print("|".join([' %-2d ' % (i, ) for i in range(args.frets)]))
+        print('+'.join(['-'*4]*args.frets))
+        marks = [' '] * args.frets
+        for i in range(6):
+            if string == i:
+                marks[fret] = '*'
+                print("|".join(['  {} '.format(mark) for mark in marks]))
+            else:
+                print("|".join(['    '] * args.frets))
+
+    nNotes = 6 * args.frets
+    count, correct = 0, 0
+
+    while 1:
+        rand = randint(0, nNotes)
+        theString, theFret = rand % 6, rand // 6
+        showBoard(theString, theFret)
+        # what is the note
+        theNote = nextNote(Roots[theString], theFret)
+
+        for i in range(3):
+            try:
+                guess = input('Name that note ')
+            except KeyboardInterrupt:
+                print('\nStatistics: {:.1f}% {} correct out of {}'.format(
+                    correct/count*100, correct, count))
+                return
+
+            if theNote == guess.title():
+                print('correct')
+                correct += 1
+                break
+            else:
+                print('incorrect')
+        else:
+            print('the correct note is ', theNote)
+
+        count += 1
+
+
 def main():
     '''
     Show notes on guitar fret board by (1) note, (2), chord, or (3) scale.
@@ -318,9 +363,12 @@ def main():
                         help='show triads for a chord')
     parser.add_argument('--box', action='store', type=int,
                         help='show pentatonic box scales: 1-5')
+    parser.add_argument('--game', action='store_true', default=False,
+                        help='play name that note game')
     parser.add_argument('notes', type=str, action='store', nargs="*")
 
     args = parser.parse_args()
+
     if args.chord and args.scale:
         raise parser.error('select either "chord" or "scale" not both')
 
@@ -428,16 +476,19 @@ def main():
 
         print('{} Scale: {} -- {}\n'.format(
             adjective, scale, ', '.join(args.notes)))
-    elif args.notes == []:
-        # no notes given. show all notes
-        args.notes = Notes
-        print('Fretboard -- All notes\n')
     elif args.triads:
         showTriads(args.notes[0].title())
         exit(0)
     elif args.caged:
         showCaged(args.notes[0].title())
         exit(0)
+    elif args.game:
+        playNoteGame(args)
+        exit(0)
+    elif args.notes == []:
+        # no notes given. show all notes
+        args.notes = Notes
+        print('Fretboard -- All notes\n')
     else:
         for i in range(len(args.notes)):
             args.notes[i] = args.notes[i].title()
