@@ -217,6 +217,67 @@ def showCaged(root_name):
     print("|".join([' {}{} '.format(*note) for note in notes]))
     
 
+def box(args):
+    '''print box pentatonic form 1 through 5'''
+    form = args.box
+
+    frets = 5
+    if form == 1:
+        strings = [
+            ['m', ' ', ' ', 'M', ' '],
+            ['*', ' ', ' ', '*', ' '],
+            ['M', ' ', '*', ' ', ' '],
+            ['*', ' ', 'm', ' ', ' '],
+            ['*', ' ', '*', ' ', ' '],
+            ['m', ' ', ' ', 'M', ' '],
+        ]
+    elif form == 2:
+        strings = [
+            [' ', 'M', ' ', 'm', ' '],
+            [' ', '*', ' ', '*', ' '],
+            ['*', ' ', '*', ' ', ' '],
+            ['m', ' ', ' ', 'M', ' '],
+            ['*', ' ', ' ', '*', ' '],
+            [' ', 'M', ' ', '*', ' '],
+        ]
+    elif form == 3:
+        strings = [
+            [' ', '*', ' ', '*', ' '],
+            [' ', 'm', ' ', ' ', 'M'],
+            ['*', ' ', ' ', '*', ' '],
+            [' ', 'M', ' ', '*', ' '],
+            [' ', '*', ' ', 'm', ' '],
+            [' ', '*', ' ', '*', ' '],
+        ]
+    elif form == 4:
+        strings = [
+            ['*', ' ', ' ', '*', ' '],
+            [' ', 'M', ' ', '*', ' '],
+            ['*', ' ', 'm', ' ', ' '],
+            ['*', ' ', '*', ' ', ' '],
+            ['m', ' ', ' ', 'M', ' '],
+            ['*', ' ', ' ', '*', ' '],
+        ]
+    elif form == 5:
+        strings = [
+            [' ', '*', ' ', 'm', ' '],
+            [' ', '*', ' ', '*', ' '],
+            ['m', ' ', ' ', 'M', ' '],
+            ['*', ' ', ' ', '*', ' '],
+            [' ', 'M', ' ', '*', ' '],
+            [' ', '*', ' ', 'm', ' '],
+        ]
+    else:
+        assert False, 'unknown box form'
+
+    print('Pentatonic form {}'.format(form))
+    print("|".join([' {:-2d} '.format(i) for i in range(1, frets+1)]))
+    print('+'.join(['-'*4]*frets))
+
+    for string in strings:
+        print("|".join([' {}  '.format(note) for note in string]))
+
+
 def main():
     '''
     Show notes on guitar fret board by (1) note, (2), chord, or (3) scale.
@@ -247,11 +308,17 @@ def main():
     parser.add_argument('--triads', '--tri', action='store_true',
                         default=False,
                         help='show triads for a chord')
+    parser.add_argument('--box', action='store', type=int,
+                        help='show pentatonic box scales: 1-5')
     parser.add_argument('notes', type=str, action='store', nargs="*")
 
     args = parser.parse_args()
     if args.chord and args.scale:
         raise parser.error('select either "chord" or "scale" not both')
+
+    if args.box:
+        box(args)
+        exit(0)
 
     if args.pentatonic:
         args.scale = True
