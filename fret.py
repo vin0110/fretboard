@@ -17,14 +17,14 @@ nNotes = len(Notes)
 nextNote = lambda note, plus:\
            Notes[(Notes.index(note.title()) + plus) % nNotes]
 majorNotes = lambda n:\
-             (Notes[n], Notes[(n+4)%nNotes], Notes[(n+7)%nNotes], )
+             (Notes[n], Notes[(n+4) % nNotes], Notes[(n+7) % nNotes], )
 minorNotes = lambda n:\
-             (Notes[n], Notes[(n+3)%nNotes], Notes[(n+7)%nNotes], )
+             (Notes[n], Notes[(n+3) % nNotes], Notes[(n+7) % nNotes], )
 seventhNotes = lambda n:\
-               (Notes[n], Notes[(n+4)%nNotes], Notes[(n+7)%nNotes],
-                Notes[(n+10)%nNotes], )
+               (Notes[n], Notes[(n+4) % nNotes], Notes[(n+7) % nNotes],
+                Notes[(n+10) % nNotes], )
 augNotes = lambda n:\
-           (Notes[n], Notes[(n+4)%nNotes], Notes[(n+8)%nNotes], )
+           (Notes[n], Notes[(n+4) % nNotes], Notes[(n+8) % nNotes], )
 
 
 def getNotes(pnotes, offset, frets):
@@ -62,13 +62,16 @@ def showNotes(args):
 
 
 def showTriads(root_name):
-    root = (Notes.index(root_name) + 5) % 12 # set for the lo E string
+    root = (Notes.index(root_name) + 5) % 12  # set for the lo E string
     a = (root + 9) % 12
     e = (root + 1) % 12
     d = (root + 4) % 12
-    if a == 0: a = 12
-    if e == 0: e = 12
-    if d == 0: d = 12
+    if a == 0:
+        a = 12
+    if e == 0:
+        e = 12
+    if d == 0:
+        d = 12
     frets = max(12, a, e+1, d+1) + 1
 
     print('Triads for {}'.format(root_name))
@@ -94,13 +97,13 @@ def showTriads(root_name):
     notes[e] = "E"
     notes[d] = "D"
     print("|".join([' {:2s} '.format(note) for note in notes]))
-    
+
     # print D
     notes = [' '] * frets
     notes[a] = "A"
     notes[e+1] = "E"
     print("|".join([' {:2s} '.format(note) for note in notes]))
-    
+
     # print A
     notes = [' '] * frets
     notes[e+1] = "E"
@@ -109,20 +112,25 @@ def showTriads(root_name):
     # print E (lo)
     notes = [' '] * frets
     print("|".join([' {:2s} '.format(note) for note in notes]))
-    
+
 
 def showCaged(root_name):
-    root = (Notes.index(root_name) + 5) % 12 # set for the lo E string
+    root = (Notes.index(root_name) + 5) % 12  # set for the lo E string
     c = (root + 4) % 12
     a = (root + 7) % 12
     g = (root + 9) % 12
     e = (root) % 12
     d = (root + 2) % 12
-    if c == 0: c = 12
-    if a == 0: a = 12
-    if g == 0: g = 12
-    if e == 0: e = 12
-    if d == 0: d = 12
+    if c == 0:
+        c = 12
+    if a == 0:
+        a = 12
+    if g == 0:
+        g = 12
+    if e == 0:
+        e = 12
+    if d == 0:
+        d = 12
     frets = max(12, c+3, a+2, g+3, e+2, d+3) + 1
     print(root_name, root, a, e, d, frets)
 
@@ -133,7 +141,7 @@ def showCaged(root_name):
     print('+'.join(['-'*4]*frets))
 
     # print E (hi)
-    notes = [[' ']* 2 for i in range(frets)]
+    notes = [[' '] * 2 for i in range(frets)]
     notes[c][0] = "C"
     notes[a][0] = "A"
     notes[g+3][0] = "G"
@@ -149,7 +157,7 @@ def showCaged(root_name):
 
     # print B
     notes = ['  '] * frets
-    notes = [[' ']* 2 for i in range(frets)]
+    notes = [[' '] * 2 for i in range(frets)]
     notes[c+1][0] = "C"
     notes[a+2][0] = "A"
     if notes[g][0] == ' ':
@@ -164,7 +172,7 @@ def showCaged(root_name):
     print("|".join([' {}{} '.format(*note) for note in notes]))
 
     # print G
-    notes = [[' ']* 2 for i in range(frets)]
+    notes = [[' '] * 2 for i in range(frets)]
     notes[c][0] = "C"
     notes[a+2][0] = "A"
     if notes[g][0] == ' ':
@@ -177,10 +185,10 @@ def showCaged(root_name):
     else:
         notes[d+2][1] = "D"
     print("|".join([' {}{} '.format(*note) for note in notes]))
-    
+
     # print D
     notes = [' '] * frets
-    notes = [[' ']* 2 for i in range(frets)]
+    notes = [[' '] * 2 for i in range(frets)]
     notes[c+2][0] = "C"
     notes[a+2][0] = "A"
     if notes[g][0] == ' ':
@@ -193,10 +201,10 @@ def showCaged(root_name):
     else:
         notes[d][1] = "D"
     print("|".join([' {}{} '.format(*note) for note in notes]))
-    
+
     # print A
     notes = ['  '] * frets
-    notes = [[' ']* 2 for i in range(frets)]
+    notes = [[' '] * 2 for i in range(frets)]
     notes[c+3][0] = "C"
     if notes[a][0] == ' ':
         notes[a][0] = "A"
@@ -208,14 +216,14 @@ def showCaged(root_name):
 
     # print E (lo)
     notes = ['  '] * frets
-    notes = [[' ']* 2 for i in range(frets)]
+    notes = [[' '] * 2 for i in range(frets)]
     notes[g+3][0] = "G"
     if notes[e][0] == ' ':
         notes[e][0] = "E"
     else:
         notes[e][1] = "E"
     print("|".join([' {}{} '.format(*note) for note in notes]))
-    
+
 
 def box(args):
     '''print box pentatonic form 1 through 5'''
@@ -404,7 +412,7 @@ def main():
                     Notes[(idx + 10) % nNotes],
                 ]
                 adjective = 'Minor ' + adjective
-            else:                
+            else:
                 # major diatonic scale
                 # Root, +2, +2, +1, +2 +2, +2
                 args.notes = [
