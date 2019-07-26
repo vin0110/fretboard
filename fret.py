@@ -291,15 +291,23 @@ def box(args):
 def playNoteGame(args):
     '''play guess that note'''
     def showBoard(string, fret):
-        print("|".join([' %-2d ' % (i, ) for i in range(args.frets)]))
-        print('+'.join(['-'*4]*args.frets))
-        marks = [' '] * args.frets
+        divider = '+'.join(['-'*4]*(args.frets+1)) + "+"
+        print(" 0 ||" + "|".join(
+            [' %-2d ' % (i, ) for i in range(1, args.frets+1)]) + "|")
+        print(divider)
+        marks = [' '] * (args.frets + 1)
+        ticks = ['', '', '*', '', '*', '', '**', '', '*', '', '', '**',
+                 '', '', '*', '', '*']
         for i in range(6):
             if string == i:
                 marks[fret] = '*'
-                print("|".join(['  {} '.format(mark) for mark in marks]))
+                print(" {} ||".format(marks[0]) + "|".join(
+                    [' {}  '.format(mark) for mark in marks[1:]]) + "|")
             else:
-                print("|".join(['    '] * args.frets))
+                print("   ||" + "|".join(['    '] * args.frets) + "|")
+        print(divider)
+        print('   ||' + '|'.join(
+            [" {:2s} ".format(tick) for tick in ticks[:args.frets]]) + "|")
 
     nNotes = 6 * args.frets
     count, correct = 0, 0
@@ -313,13 +321,24 @@ def playNoteGame(args):
 
         for i in range(3):
             try:
-                guess = input('Name that note ')
+                try:
+                    guess = input('Name that note ')
+                    guess = guess.title()
+                    idx = Notes.index(guess)
+                except ValueError:
+                    try:
+                        idx = bNotes.index(guess)
+                    except ValueError:
+                        print('unknown note "{}"'.format(guess))
+                        continue
+                theGuess = Notes[idx]
             except (KeyboardInterrupt, EOFError):
-                print('\nStatistics: {:.1f}% {} correct out of {}'.format(
-                    correct/count*100, correct, count))
+                if count > 0:
+                    print('\nStatistics: {:.1f}% {} correct out of {}'.format(
+                        correct/count*100, correct, count))
                 return
 
-            if theNote == guess.title():
+            if theNote == theGuess.title():
                 print('correct')
                 correct += 1
                 break
@@ -339,55 +358,73 @@ def main():
     parser = argparse.ArgumentParser(description=main.__doc__)
     parser.add_argument('-f', '--frets', type=int, default=12,
                         help='select number of frets (default=12)')
-    parser.add_argument('-c', '--chord', action='store_true', default=False,
-                        help='show all notes in given chord')
-    parser.add_argument('--major', '--maj', action='store_true', default=False,
-                        help='show major (the default for chord)')
-    parser.add_argument('--minor', '--min', action='store_true', default=False,
-                        help='show minor(default for pentatonic')
-    parser.add_argument('--seventh', '--7', action='store_true',
-                        default=False,
-                        help='in chord mode: show major 7th')
-    parser.add_argument('--aug', action='store_true', default=False,
-                        help='in chord mode: show augmented')
-    parser.add_argument('--scale', action='store_true', default=False,
-                        help='show diatonic scale ')
-    parser.add_argument('--pentatonic', '--pent',
-                        action='store_true', default=False,
-                        help='show pentatonic scale '
-                        '(default is minor scale; use --major to change)')
-    parser.add_argument('--caged', action='store_true', default=False,
-                        help='show caged for a chord')
-    parser.add_argument('--triads', '--tri', action='store_true',
-                        default=False,
-                        help='show triads for a chord')
-    parser.add_argument('--box', action='store', type=int,
-                        help='show pentatonic box scales: 1-5')
-    parser.add_argument('--game', action='store_true', default=False,
-                        help='play name that note game')
+    subparsers = parser.add_subparsers(
+        title='subcommands',
+        description='valid subcommands',
+        dest='sub',
+        help='command help')
+
+    # subparser for note
+    noteParser = subparsers.add_parser('note', help='show chords')
+    noteParser.add_argument('notes', type=str, action='store', nargs="*")
+
+    # subparser for chord
+    chordParser = subparsers.add_parser('chord', help='show chords')
+    chordParser.add_argument('--minor', '--min', '-m',
+                             action='store_true', default=False,
+                             help='show minor (default is major)')
+    chordParser.add_argument('--seventh', '-7', action='store_true',
+                             default=False,
+                             help='show major 7th')
+    chordParser.add_argument('--aug', '-a', action='store_true', default=False,
+                             help='show augmented')
+    chordParser.add_argument('root', type=str, action='store',
+                             help='chord root')
+
+    # subparser for scale
+    scaleParser = subparsers.add_parser('scale', help='show scales')
+    scaleParser.add_argument('--diantonic', '--dia',
+                             action='store_true', default=False,
+                             help='show diatonic scale (default: pentatonic')
+    scaleParser.add_argument('--box', action='store', type=int,
+                             help='show pentatonic box scales: 1-5')
+    scaleParser.add_argument('root', type=str, action='store',
+                             help='scale root')
+
+    # subparser for caged
+    cagedParser = subparsers.add_parser('caged', help='show caged patterns')
+    cagedParser.add_argument('--triads', '--tri', action='store_true',
+                             default=False,
+                             help='show triads ')
+
+    # subparser for game
+    gameParser = subparsers.add_parser('game', help='play name that note game')
+
     parser.add_argument('notes', type=str, action='store', nargs="*")
 
     args = parser.parse_args()
+    print(args)
 
-    if args.chord and args.scale:
-        raise parser.error('select either "chord" or "scale" not both')
+    sub = args.sub
+    if sub == 'note':
+        if args.notes == []:
+            # no notes given. show all notes
+            args.notes = Notes
+            print('Fretboard -- All notes\n')
+        else:
+            for i in range(len(args.notes)):
+                args.notes[i] = args.notes[i].title()
+        print('Notes: {}\n'.format(', '.join(args.notes)))
 
-    if args.box:
-        box(args)
-        exit(0)
+        args.frets += 1
+        showNotes(args)
 
-    if args.pentatonic:
-        args.scale = True
-
-    nflags = sum([args.major, args.minor, args.seventh, args.aug])
-    if args.chord:
+    elif sub == 'chord':
+        nflags = sum([args.minor, args.seventh, args.aug])
         #        setattr(args, 'seventh', args.__dict__['7'])
-        if len(args.notes) != 1:
-            parser.error('must select {} chord'.format(
-                'a' if len(args.notes) == 0 else 'only one'))
         if nflags > 1:
             parser.error('too many chord types')
-        chord = args.notes[0].title()
+        chord = args.root.title()
         try:
             idx = Notes.index(chord)
         except ValueError:
@@ -395,11 +432,7 @@ def main():
                 idx = bNotes.index(chord)
             except ValueError:
                 parser.error('unknown chord "{}"'.format(args.notes[0]))
-        if nflags == 0 or args.major:
-            args.notes = majorNotes(idx)
-            print('n', idx, args.notes)
-            sup = 'Maj'
-        elif args.minor:
+        if args.minor:
             args.notes = minorNotes(idx)
             sup = 'Min'
         elif args.seventh:
@@ -408,94 +441,97 @@ def main():
         elif args.aug:
             args.notes = augNotes(idx)
             sup = 'Aug'
-        print('Chord: {}{} -- {}\n'.format(chord, sup, ', '.join(args.notes)))
-    elif args.scale:
-        if len(args.notes) != 1:
-            parser.error('must select {} scale'.format(
-                'a' if len(args.notes) == 0 else 'only one'))
-        scale = args.notes[0].title()
-        try:
-            idx = Notes.index(scale)
-        except ValueError:
-            try:
-                idx = bNotes.index(scale)
-            except ValueError:
-                parser.error('unknown note "{}"'.format(args.notes[0]))
-        if args.pentatonic:
-            adjective = 'Pentatonic'
-            if args.major:
-                # major pentatonic scale
-                # Root, +2, +2, +3, +2
-                args.notes = [
-                    Notes[idx],
-                    Notes[(idx + 2) % nNotes],
-                    Notes[(idx + 4) % nNotes],
-                    Notes[(idx + 7) % nNotes],
-                    Notes[(idx + 9) % nNotes],
-                ]
-                adjective = 'Major ' + adjective
-            else:
-                # minor pentatonic scale
-                # Root, +3, +2, +2, +3
-                args.notes = [
-                    Notes[idx],
-                    Notes[(idx + 3) % nNotes],
-                    Notes[(idx + 5) % nNotes],
-                    Notes[(idx + 7) % nNotes],
-                    Notes[(idx + 10) % nNotes],
-                ]
-                adjective = 'Minor ' + adjective
+            print('Chord: {}{} -- {}\n'.format(
+                chord, sup, ', '.join(args.notes)))
         else:
-            adjective = "Diatonic"
-            if args.minor:
-                # minor diatonic scale
-                # Root, +2, +1, +2, +2 +1, +2
-                args.notes = [
-                    Notes[idx],
-                    Notes[(idx + 2) % nNotes],
-                    Notes[(idx + 3) % nNotes],
-                    Notes[(idx + 5) % nNotes],
-                    Notes[(idx + 7) % nNotes],
-                    Notes[(idx + 8) % nNotes],
-                    Notes[(idx + 10) % nNotes],
-                ]
-                adjective = 'Minor ' + adjective
+            args.notes = majorNotes(idx)
+            print('n', idx, args.notes)
+            sup = 'Maj'
+
+        args.frets += 1
+        showNotes(args)
+
+    elif sub == 'scale':
+        if args.box:
+            box(args)
+        else:
+            scale = args.root.title()
+            try:
+                idx = Notes.index(scale)
+            except ValueError:
+                try:
+                    idx = bNotes.index(scale)
+                except ValueError:
+                    parser.error('unknown note "{}"'.format(args.notes[0]))
+            if args.pentatonic:
+                adjective = 'Pentatonic'
+                if args.major:
+                    # major pentatonic scale
+                    # Root, +2, +2, +3, +2
+                    args.notes = [
+                        Notes[idx],
+                        Notes[(idx + 2) % nNotes],
+                        Notes[(idx + 4) % nNotes],
+                        Notes[(idx + 7) % nNotes],
+                        Notes[(idx + 9) % nNotes],
+                    ]
+                    adjective = 'Major ' + adjective
+                else:
+                    # minor pentatonic scale
+                    # Root, +3, +2, +2, +3
+                    args.notes = [
+                        Notes[idx],
+                        Notes[(idx + 3) % nNotes],
+                        Notes[(idx + 5) % nNotes],
+                        Notes[(idx + 7) % nNotes],
+                        Notes[(idx + 10) % nNotes],
+                    ]
+                    adjective = 'Minor ' + adjective
             else:
-                # major diatonic scale
-                # Root, +2, +2, +1, +2 +2, +2
-                args.notes = [
-                    Notes[idx],
-                    Notes[(idx + 2) % nNotes],
-                    Notes[(idx + 4) % nNotes],
-                    Notes[(idx + 5) % nNotes],
-                    Notes[(idx + 7) % nNotes],
-                    Notes[(idx + 9) % nNotes],
-                    Notes[(idx + 11) % nNotes],
-                ]
-                adjective = 'Major ' + adjective
+                adjective = "Diatonic"
+                if args.minor:
+                    # minor diatonic scale
+                    # Root, +2, +1, +2, +2 +1, +2
+                    args.notes = [
+                        Notes[idx],
+                        Notes[(idx + 2) % nNotes],
+                        Notes[(idx + 3) % nNotes],
+                        Notes[(idx + 5) % nNotes],
+                        Notes[(idx + 7) % nNotes],
+                        Notes[(idx + 8) % nNotes],
+                        Notes[(idx + 10) % nNotes],
+                    ]
+                    adjective = 'Minor ' + adjective
+                else:
+                    # major diatonic scale
+                    # Root, +2, +2, +1, +2 +2, +2
+                    args.notes = [
+                        Notes[idx],
+                        Notes[(idx + 2) % nNotes],
+                        Notes[(idx + 4) % nNotes],
+                        Notes[(idx + 5) % nNotes],
+                        Notes[(idx + 7) % nNotes],
+                        Notes[(idx + 9) % nNotes],
+                        Notes[(idx + 11) % nNotes],
+                    ]
+                    adjective = 'Major ' + adjective
 
-        print('{} Scale: {} -- {}\n'.format(
-            adjective, scale, ', '.join(args.notes)))
-    elif args.triads:
-        showTriads(args.notes[0].title())
-        exit(0)
-    elif args.caged:
-        showCaged(args.notes[0].title())
-        exit(0)
-    elif args.game:
+            print('{} Scale: {} -- {}\n'.format(
+                adjective, scale, ', '.join(args.notes)))
+
+            args.frets += 1
+            showNotes(args)
+    elif sub == 'caged':
+        if args.triads:
+            showTriads(args.notes[0].title())
+        else:
+            showCaged(args.notes[0].title())
+
+    elif sub == 'game':
         playNoteGame(args)
-        exit(0)
-    elif args.notes == []:
-        # no notes given. show all notes
-        args.notes = Notes
-        print('Fretboard -- All notes\n')
     else:
-        for i in range(len(args.notes)):
-            args.notes[i] = args.notes[i].title()
-        print('Notes: {}\n'.format(', '.join(args.notes)))
-
-    args.frets += 1
-    showNotes(args)
+        print('unknown command: {}'.format(sub))
+        exit(-1)
 
 
 if __name__ == "__main__":
