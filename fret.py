@@ -401,7 +401,7 @@ def main():
 
     # subparser for caged
     cagedParser = subparsers.add_parser('caged', help='show caged patterns')
-    cagedParser.add_argument('--triads', '--tri', action='store_true',
+    cagedParser.add_argument('--triads', '--tri', '-t', action='store_true',
                              default=False,
                              help='show triads ')
     cagedParser.add_argument('root', type=str, action='store',
@@ -411,7 +411,6 @@ def main():
     gameParser = subparsers.add_parser('game', help='play name that note game')
 
     args = parser.parse_args()
-    print(args)
 
     sub = args.sub
     if sub == 'note':
