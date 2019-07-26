@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 '''
 Fretboard: learn notes on a guitar.
 
@@ -314,7 +314,7 @@ def playNoteGame(args):
         for i in range(3):
             try:
                 guess = input('Name that note ')
-            except KeyboardInterrupt:
+            except (KeyboardInterrupt, EOFError):
                 print('\nStatistics: {:.1f}% {} correct out of {}'.format(
                     correct/count*100, correct, count))
                 return
