@@ -370,11 +370,18 @@ def main():
         help='command help')
 
     # subparser for note
-    noteParser = subparsers.add_parser('note', help='show chords')
-    noteParser.add_argument('notes', type=str, action='store', nargs="*")
+    noteParser = subparsers.add_parser(
+        'note',
+        description="Show selected notes on the fretboard.",
+        help='show named notes')
+    noteParser.add_argument('notes', type=str, action='store', nargs="*",
+                            help='pick notes (default: blank, all notes)')
 
     # subparser for chord
-    chordParser = subparsers.add_parser('chord', help='show chords')
+    chordParser = subparsers.add_parser(
+        'chord',
+        description='Show all the notes for a chord.',
+        help='show chords')
     chordParser.add_argument('--minor', '--min', '-m',
                              action='store_true', default=False,
                              help='show minor (default is major)')
@@ -387,7 +394,10 @@ def main():
                              help='chord root')
 
     # subparser for scale
-    scaleParser = subparsers.add_parser('scale', help='show scales')
+    scaleParser = subparsers.add_parser(
+        'scale',
+        description='Show scales.',
+        help='show scales')
     scaleParser.add_argument('--diatonic', '--dia',
                              action='store_true', default=False,
                              help='show diatonic scale (default: pentatonic)')
@@ -400,7 +410,10 @@ def main():
                              help='scale root')
 
     # subparser for caged
-    cagedParser = subparsers.add_parser('caged', help='show caged patterns')
+    cagedParser = subparsers.add_parser(
+        'caged',
+        description='Show the CAGED system for a given root.',
+        help='show caged patterns')
     cagedParser.add_argument('--triads', '--tri', '-t', action='store_true',
                              default=False,
                              help='show triads ')
@@ -408,7 +421,10 @@ def main():
                              help='scale root')
 
     # subparser for game
-    gameParser = subparsers.add_parser('game', help='play name that note game')
+    gameParser = subparsers.add_parser(
+        'game',
+        description='Play "Name that Note" game".',
+        help='play "name that note" game')
 
     args = parser.parse_args()
 
