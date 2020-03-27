@@ -132,6 +132,8 @@ def showCaged(root_name):
     g = (root + 9) % 12
     e = (root) % 12
     d = (root + 2) % 12
+
+    '''
     if c == 0:
         c = 12
     if a == 0:
@@ -142,10 +144,13 @@ def showCaged(root_name):
         e = 12
     if d == 0:
         d = 12
+    '''
     frets = max(12, c+3, a+2, g+3, e+2, d+3) + 1
-    print(root_name, root, a, e, d, frets)
+    #print(root_name, root, a, e, d, frets)
 
-    print('CAGED for {}'.format(root_name))
+    print('CAGED for {} ---'.format(root_name),
+          f'C:{c} A:{a} G:{g} E:{e} D:{d}')
+
     fret_str = ["%-2d " % (i, ) for i in range(frets)]
     fret_str[root] = '{:2} '.format(root_name)
     print("|".join([' {}'.format(i) for i in fret_str]))
@@ -167,7 +172,6 @@ def showCaged(root_name):
     print("|".join([' {}{} '.format(*note) for note in notes]))
 
     # print B
-    notes = ['  '] * frets
     notes = [[' '] * 2 for i in range(frets)]
     notes[c+1][0] = "C"
     notes[a+2][0] = "A"
@@ -236,65 +240,102 @@ def showCaged(root_name):
     print("|".join([' {}{} '.format(*note) for note in notes]))
 
 
+BoxStrings = {}
+BoxStrings['g'] = [
+    ['m', ' ', ' ', 'M', ' '],
+    ['*', ' ', ' ', '*', ' '],
+    ['M', ' ', '*', ' ', ' '],
+    ['*', ' ', 'm', ' ', ' '],
+    ['*', ' ', '*', ' ', ' '],
+    ['m', ' ', ' ', 'M', ' '],
+]
+BoxStrings['e'] = [
+    [' ', 'M', ' ', '*', ' '],
+    [' ', '*', ' ', 'm', ' '],
+    ['*', ' ', '*', ' ', ' '],
+    ['m', ' ', ' ', 'M', ' '],
+    ['*', ' ', ' ', '*', ' '],
+    [' ', 'M', ' ', '*', ' '],
+]
+BoxStrings['d'] = [
+    [' ', '*', ' ', '*', ' '],
+    [' ', 'm', ' ', ' ', 'M'],
+    ['*', ' ', ' ', '*', ' '],
+    [' ', 'M', ' ', '*', ' '],
+    [' ', '*', ' ', 'm', ' '],
+    [' ', '*', ' ', '*', ' '],
+]
+BoxStrings['c'] = [
+    ['*', ' ', ' ', '*', ' '],
+    [' ', 'M', ' ', '*', ' '],
+    ['*', ' ', 'm', ' ', ' '],
+    ['*', ' ', '*', ' ', ' '],
+    ['m', ' ', ' ', 'M', ' '],
+    ['*', ' ', ' ', '*', ' '],
+]
+BoxStrings['a'] = [
+    [' ', '*', ' ', 'm', ' '],
+    [' ', '*', ' ', '*', ' '],
+    ['m', ' ', ' ', 'M', ' '],
+    ['*', ' ', ' ', '*', ' '],
+    [' ', 'M', ' ', '*', ' '],
+    [' ', '*', ' ', 'm', ' '],
+]
+
+# frets for all boxes
+# offset is
+# E hi
+BoxAll = [
+    ['  ', 'de', '  ', 'dc', '  ', '  ', 'ca', '  ', 'ag', '  ', '  ', 'MM', ],
+    ['  ', 'mm', '  ', '  ', 'M ', '  ', 'ca', '  ', 'ag', '  ', '  ', 'ge', ],
+    ['de', '  ', '  ', 'dc', '  ', 'mm', '  ', '  ', 'ag', '  ', 'ge', '  ', ],
+    ['  ', 'MM', '  ', 'dc', '  ', 'ca', '  ', '  ', 'ag', '  ', 'mm', '  ', ],
+    ['  ', 'de', '  ', 'mm', '  ', '  ', 'MM', '  ', 'ag', '  ', 'ge', '  ', ],
+    ['  ', 'de', '  ', 'dc', '  ', '  ', 'ca', '  ', 'ag', '  ', '  ', 'MM', ],
+]
+
+
 def box(args):
-    '''print box pentatonic form 1 through 5'''
-    form = args.box
+    '''print box pentatonic form g, e, d, c, a'''
+    if args.root:
+        if args.form:
+            print('form arg ignored')
 
-    frets = 5
-    if form == 1:
-        strings = [
-            ['m', ' ', ' ', 'M', ' '],
-            ['*', ' ', ' ', '*', ' '],
-            ['M', ' ', '*', ' ', ' '],
-            ['*', ' ', 'm', ' ', ' '],
-            ['*', ' ', '*', ' ', ' '],
-            ['m', ' ', ' ', 'M', ' '],
-        ]
-    elif form == 2:
-        strings = [
-            [' ', 'M', ' ', 'm', ' '],
-            [' ', '*', ' ', '*', ' '],
-            ['*', ' ', '*', ' ', ' '],
-            ['m', ' ', ' ', 'M', ' '],
-            ['*', ' ', ' ', '*', ' '],
-            [' ', 'M', ' ', '*', ' '],
-        ]
-    elif form == 3:
-        strings = [
-            [' ', '*', ' ', '*', ' '],
-            [' ', 'm', ' ', ' ', 'M'],
-            ['*', ' ', ' ', '*', ' '],
-            [' ', 'M', ' ', '*', ' '],
-            [' ', '*', ' ', 'm', ' '],
-            [' ', '*', ' ', '*', ' '],
-        ]
-    elif form == 4:
-        strings = [
-            ['*', ' ', ' ', '*', ' '],
-            [' ', 'M', ' ', '*', ' '],
-            ['*', ' ', 'm', ' ', ' '],
-            ['*', ' ', '*', ' ', ' '],
-            ['m', ' ', ' ', 'M', ' '],
-            ['*', ' ', ' ', '*', ' '],
-        ]
-    elif form == 5:
-        strings = [
-            [' ', '*', ' ', 'm', ' '],
-            [' ', '*', ' ', '*', ' '],
-            ['m', ' ', ' ', 'M', ' '],
-            ['*', ' ', ' ', '*', ' '],
-            [' ', 'M', ' ', '*', ' '],
-            [' ', '*', ' ', 'm', ' '],
-        ]
+        print('All box scales for', args.root.upper())
+
+        frets = 15
+        root = 12 - (Notes.index(args.root.upper()) + 5) % 12
+        print('r', args.root, root)
+
+        print("|".join([' {:-2d} '.format(i) for i in range(1, frets+1)]))
+        for i in range(6):
+            # set for the lo E string
+            string = BoxAll[i][root:] + BoxAll[i][:root]
+            string += string[:3]
+            print('', " | ".join(string))
     else:
-        assert False, 'unknown box form'
+        boxnames = ['g', 'e', 'd', 'c', 'a']
+        form = args.form.lower()
+        try:
+            form = int(form)
+            form = boxnames[form-1]
+        except IndexError:
+            assert False, 'unknown box form'
+        except ValueError:
+            pass
 
-    print('Pentatonic form {}'.format(form))
-    print("|".join([' {:-2d} '.format(i) for i in range(1, frets+1)]))
-    print('+'.join(['-'*4]*frets))
+        frets = 5
+        try:
+            strings = BoxStrings[form]
+        except KeyError:
+            assert False, 'unknown box form'
 
-    for string in strings:
-        print("|".join([' {}  '.format(note) for note in string]))
+        print('Pentatonic form {}'.format(form.upper()))
+        print("|".join([' {:-2d} '.format(i) for i in range(1, frets+1)]))
+        print('+'.join(['-'*4]*frets))
+
+        for string in strings:
+            print("|".join([' {}  '.format(note) for note in string]))
 
 
 def playNoteGame(args):
@@ -366,8 +407,8 @@ def main():
     subparsers = parser.add_subparsers(
         title='subcommands',
         description='valid subcommands',
-        dest='sub',
-        help='command help')
+        dest='sub', )
+    subparsers.required = True
 
     # subparser for note
     noteParser = subparsers.add_parser(
@@ -404,10 +445,21 @@ def main():
     scaleParser.add_argument('--minor', '--min', '-m',
                              action='store_true', default=False,
                              help='show minor (default is major)')
-    scaleParser.add_argument('--box', action='store', type=int,
-                             help='show pentatonic box scales: 1-5')
     scaleParser.add_argument('root', type=str, action='store',
                              help='scale root')
+
+    # subparser for box
+    boxParser = subparsers.add_parser(
+        'box',
+        description='Show box forms.',
+        help='show box')
+    boxParser.add_argument('--form', action='store', type=str,
+                           help='show pentatonic box scales: g,e,d,c,a '
+                           'or 1-5')
+    boxParser.add_argument('root', action='store', type=str, nargs="?",
+                           help='show all box forms for this key. '
+                           '--form args is ignored. '
+                           'if omitted, form is required')
 
     # subparser for caged
     cagedParser = subparsers.add_parser(
@@ -472,72 +524,73 @@ def main():
         showNotes(args)
 
     elif sub == 'scale':
-        if args.box:
-            box(args)
-        else:
-            scale = args.root.title()
-            try:
-                idx = getNoteIdx(scale)
-            except ValueError:
-                parser.error('unknown note "{}"'.format(args.root))
-            if args.diatonic:
-                adjective = "Diatonic"
-                if args.minor:
-                    # minor diatonic scale
-                    # Root, +2, +1, +2, +2 +1, +2
-                    args.notes = [
-                        Notes[idx],
-                        Notes[(idx + 2) % nNotes],
-                        Notes[(idx + 3) % nNotes],
-                        Notes[(idx + 5) % nNotes],
-                        Notes[(idx + 7) % nNotes],
-                        Notes[(idx + 8) % nNotes],
-                        Notes[(idx + 10) % nNotes],
-                    ]
-                    adjective = 'Minor ' + adjective
-                else:
-                    # major diatonic scale
-                    # Root, +2, +2, +1, +2 +2, +2
-                    args.notes = [
-                        Notes[idx],
-                        Notes[(idx + 2) % nNotes],
-                        Notes[(idx + 4) % nNotes],
-                        Notes[(idx + 5) % nNotes],
-                        Notes[(idx + 7) % nNotes],
-                        Notes[(idx + 9) % nNotes],
-                        Notes[(idx + 11) % nNotes],
-                    ]
-                    adjective = 'Major ' + adjective
+        scale = args.root.title()
+        try:
+            idx = getNoteIdx(scale)
+        except ValueError:
+            parser.error('unknown note "{}"'.format(args.root))
+        if args.diatonic:
+            adjective = "Diatonic"
+            if args.minor:
+                # minor diatonic scale
+                # Root, +2, +1, +2, +2 +1, +2
+                args.notes = [
+                    Notes[idx],
+                    Notes[(idx + 2) % nNotes],
+                    Notes[(idx + 3) % nNotes],
+                    Notes[(idx + 5) % nNotes],
+                    Notes[(idx + 7) % nNotes],
+                    Notes[(idx + 8) % nNotes],
+                    Notes[(idx + 10) % nNotes],
+                ]
+                adjective = 'Minor ' + adjective
             else:
-                adjective = 'Pentatonic'
-                if args.minor:
-                    # minor pentatonic scale
-                    # Root, +3, +2, +2, +3
-                    args.notes = [
-                        Notes[idx],
-                        Notes[(idx + 3) % nNotes],
-                        Notes[(idx + 5) % nNotes],
-                        Notes[(idx + 7) % nNotes],
-                        Notes[(idx + 10) % nNotes],
-                    ]
-                    adjective = 'Minor ' + adjective
-                else:
-                    # major pentatonic scale
-                    # Root, +2, +2, +3, +2
-                    args.notes = [
-                        Notes[idx],
-                        Notes[(idx + 2) % nNotes],
-                        Notes[(idx + 4) % nNotes],
-                        Notes[(idx + 7) % nNotes],
-                        Notes[(idx + 9) % nNotes],
-                    ]
-                    adjective = 'Major ' + adjective
+                # major diatonic scale
+                # Root, +2, +2, +1, +2 +2, +2
+                args.notes = [
+                    Notes[idx],
+                    Notes[(idx + 2) % nNotes],
+                    Notes[(idx + 4) % nNotes],
+                    Notes[(idx + 5) % nNotes],
+                    Notes[(idx + 7) % nNotes],
+                    Notes[(idx + 9) % nNotes],
+                    Notes[(idx + 11) % nNotes],
+                ]
+                adjective = 'Major ' + adjective
+        else:
+            adjective = 'Pentatonic'
+            if args.minor:
+                # minor pentatonic scale
+                # Root, +3, +2, +2, +3
+                args.notes = [
+                    Notes[idx],
+                    Notes[(idx + 3) % nNotes],
+                    Notes[(idx + 5) % nNotes],
+                    Notes[(idx + 7) % nNotes],
+                    Notes[(idx + 10) % nNotes],
+                ]
+                adjective = 'Minor ' + adjective
+            else:
+                # major pentatonic scale
+                # Root, +2, +2, +3, +2
+                args.notes = [
+                    Notes[idx],
+                    Notes[(idx + 2) % nNotes],
+                    Notes[(idx + 4) % nNotes],
+                    Notes[(idx + 7) % nNotes],
+                    Notes[(idx + 9) % nNotes],
+                ]
+                adjective = 'Major ' + adjective
 
-            print('{} Scale: {} -- {}\n'.format(
-                adjective, scale, ', '.join(args.notes)))
+        print('{} Scale: {} -- {}\n'.format(
+            adjective, scale, ', '.join(args.notes)))
 
-            args.frets += 1
-            showNotes(args)
+        args.frets += 1
+        showNotes(args)
+
+    elif sub == 'box':
+        box(args)
+
     elif sub == 'caged':
         if args.triads:
             showTriads(args.root.title())
@@ -547,7 +600,10 @@ def main():
     elif sub == 'game':
         playNoteGame(args)
     else:
-        print('unknown command: {}'.format(sub))
+        if sub:
+            print('unknown command: {}'.format(sub))
+        else:
+            print('no command given')
         exit(-1)
 
 
