@@ -453,7 +453,7 @@ def main():
         'box',
         description='Show box forms.',
         help='show box')
-    boxParser.add_argument('--form', action='store', type=str,
+    boxParser.add_argument('-f', '--form', action='store', type=str,
                            help='show pentatonic box scales: g,e,d,c,a '
                            'or 1-5')
     boxParser.add_argument('root', action='store', type=str, nargs="?",
