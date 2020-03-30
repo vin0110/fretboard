@@ -15,6 +15,9 @@ Roots = ['E', 'B', 'G', 'D', 'A', 'E']
 Notes = ['A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#']
 bNotes = ['A', 'Bb', 'B', 'C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab']
 nNotes = len(Notes)
+# these are the marks on the guitar neck
+Ticks = ['', '', '*', '', '*', '', '**', '', '*', '', '', '**',
+         '', '', '*', '', '*']
 
 nextNote = lambda note, plus:\
     Notes[(Notes.index(note.title()) + plus) % nNotes]
@@ -70,6 +73,10 @@ def showNotes(args):
                     for note in getNotes(args.notes, 0, args.frets)]))
     # E string again
     print("|".join([' {:2s} '.format(note) for note in eNotes]))
+
+    print('+'.join(['-'*4]*(args.frets)) + "+")
+    print('    |' + '|'.join(
+        [" {:2s} ".format(tick) for tick in Ticks[:args.frets-1]]))
 
 
 def showTriads(root_name):
@@ -288,7 +295,7 @@ BoxStrings['a'] = [
 BoxAll = [
     ['  ', 'de', '  ', 'dc', '  ', '  ', 'ca', '  ', 'ag', '  ', '  ', 'MM', ],
     ['  ', 'mm', '  ', '  ', 'M ', '  ', 'ca', '  ', 'ag', '  ', '  ', 'ge', ],
-    ['de', '  ', '  ', 'dc', '  ', 'mm', '  ', '  ', 'ag', '  ', 'ge', '  ', ],
+    ['de', '  ', '  ', 'dc', '  ', 'mm', '  ', '  ', 'MM', '  ', 'ge', '  ', ],
     ['  ', 'MM', '  ', 'dc', '  ', 'ca', '  ', '  ', 'ag', '  ', 'mm', '  ', ],
     ['  ', 'de', '  ', 'mm', '  ', '  ', 'MM', '  ', 'ag', '  ', 'ge', '  ', ],
     ['  ', 'de', '  ', 'dc', '  ', '  ', 'ca', '  ', 'ag', '  ', '  ', 'MM', ],
@@ -305,14 +312,15 @@ def box(args):
 
         frets = 15
         root = 12 - (Notes.index(args.root.upper()) + 5) % 12
-        print('r', args.root, root)
 
-        print("|".join([' {:-2d} '.format(i) for i in range(1, frets+1)]))
+        print(" 0 ||" +
+              "|".join([' {:-2d} '.format(i) for i in range(1, frets+1)]))
+        print('---++' + '+'.join(['-'*4]*(frets)))
         for i in range(6):
             # set for the lo E string
             string = BoxAll[i][root:] + BoxAll[i][:root]
             string += string[:3]
-            print('', " | ".join(string))
+            print('{:2s} ||'.format(string[11]), " | ".join(string))
     else:
         boxnames = ['g', 'e', 'd', 'c', 'a']
         form = args.form.lower()
@@ -346,8 +354,6 @@ def playNoteGame(args):
             [' %-2d ' % (i, ) for i in range(1, args.frets+1)]) + "|")
         print(divider)
         marks = [' '] * (args.frets + 1)
-        ticks = ['', '', '*', '', '*', '', '**', '', '*', '', '', '**',
-                 '', '', '*', '', '*']
         for i in range(6):
             if string == i:
                 marks[fret] = '*'
@@ -357,7 +363,7 @@ def playNoteGame(args):
                 print("   ||" + "|".join(['    '] * args.frets) + "|")
         print(divider)
         print('   ||' + '|'.join(
-            [" {:2s} ".format(tick) for tick in ticks[:args.frets]]) + "|")
+            [" {:2s} ".format(tick) for tick in Ticks[:args.frets]]) + "|")
 
     nNotes = 6 * args.frets
     count, correct = 0, 0
