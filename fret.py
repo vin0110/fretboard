@@ -21,15 +21,34 @@ Ticks = ['', '', '*', '', '*', '', '**', '', '*', '', '', '**',
 
 nextNote = lambda note, plus:\
     Notes[(Notes.index(note.title()) + plus) % nNotes]
+
+# major scale: WWhWWWh
+# NOTE:   1 - 2 - 3 4 - 5 - 6  -  7  8
+# OFFSET: 0 1 2 3 4 5 6 7 8 9 10 11 12
+# major: 1, 3, 5 -- 0, 4, 7
 majorNotes = lambda n:\
     (Notes[n], Notes[(n+4) % nNotes], Notes[(n+7) % nNotes], )
+# minor: 1, b3, 5 -- 0, 3, 7
 minorNotes = lambda n:\
     (Notes[n], Notes[(n+3) % nNotes], Notes[(n+7) % nNotes], )
+# 7th: 1, 3, 5, b7 -- 0, 4, 7, 10
 seventhNotes = lambda n:\
     (Notes[n], Notes[(n+4) % nNotes], Notes[(n+7) % nNotes],
      Notes[(n+10) % nNotes], )
+# min7: 1, b3, 5, b7 -- 0, 3, 7, 10
+minor7Notes = lambda n:\
+    (Notes[n], Notes[(n+3) % nNotes], Notes[(n+7) % nNotes],
+     Notes[(n+10) % nNotes], )
+# maj7: 1, 3, 5, 7 -- 0, 4, 7, 11
+major7Notes = lambda n:\
+    (Notes[n], Notes[(n+4) % nNotes], Notes[(n+7) % nNotes],
+     Notes[(n+11) % nNotes], )
+# aug: 1, 3, #5 -- 0, 4, 8
 augNotes = lambda n:\
     (Notes[n], Notes[(n+4) % nNotes], Notes[(n+8) % nNotes], )
+# dim: 1, b3, b5 -- 0, 3, 6
+dimNotes = lambda n:\
+    (Notes[n], Notes[(n+3) % nNotes], Notes[(n+6) % nNotes], )
 
 
 def getNoteIdx(note):
@@ -402,6 +421,44 @@ def playNoteGame(args):
         count += 1
 
 
+def chord(args):
+    nflags = sum([args.minor, args.seventh, args.aug, args.major7,
+                  args.minor7, args.dim])
+    #        setattr(args, 'seventh', args.__dict__['7'])
+    if nflags > 1:
+        raise ValueError('too many chord types')
+    chord = args.root.title()
+
+    idx = getNoteIdx(chord)
+    if args.minor:
+        args.notes = minorNotes(idx)
+        sup = 'min'
+    elif args.seventh:
+        args.notes = seventhNotes(idx)
+        sup = '7'
+    elif args.aug:
+        args.notes = augNotes(idx)
+        sup = 'Aug'
+    elif args.major7:
+        args.notes = major7Notes(idx)
+        sup = 'Maj7'
+    elif args.minor7:
+        args.notes = minor7Notes(idx)
+        sup = 'min7'
+    elif args.dim:
+        args.notes = dimNotes(idx)
+        sup = 'Dim'
+    else:
+        args.notes = majorNotes(idx)
+        print('n', idx, args.notes)
+        sup = 'Maj'
+
+    print('Chord: {}{} -- {}\n'.format(
+        chord, sup, ', '.join(args.notes)))
+    args.frets += 1
+    showNotes(args)
+
+
 def main():
     '''
     Show notes on guitar fret board by (1) note, (2), chord, or (3) scale.
@@ -429,14 +486,20 @@ def main():
         'chord',
         description='Show all the notes for a chord.',
         help='show chords')
-    chordParser.add_argument('--minor', '--min', '-m',
+    chordParser.add_argument('--minor', '--min', '--m', '-m',
                              action='store_true', default=False,
                              help='show minor (default is major)')
-    chordParser.add_argument('--seventh', '-7', action='store_true',
+    chordParser.add_argument('--seventh', '--7', '-7', action='store_true',
                              default=False,
                              help='show major 7th')
     chordParser.add_argument('--aug', '-a', action='store_true', default=False,
                              help='show augmented')
+    chordParser.add_argument('--major7', '--maj7', '--M7', action='store_true',
+                             default=False, help='show major 7th')
+    chordParser.add_argument('--minor7', '--min7', '--m7', action='store_true',
+                             default=False, help='show major 7th')
+    chordParser.add_argument('--dim', action='store_true', default=False,
+                             help='show diminished')
     chordParser.add_argument('root', type=str, action='store',
                              help='chord root')
 
@@ -501,34 +564,12 @@ def main():
         showNotes(args)
 
     elif sub == 'chord':
-        nflags = sum([args.minor, args.seventh, args.aug])
-        #        setattr(args, 'seventh', args.__dict__['7'])
-        if nflags > 1:
-            parser.error('too many chord types')
-        chord = args.root.title()
         try:
-            idx = getNoteIdx(chord)
-        except ValueError:
+            chord(args)
+        except ValueError as e:
+            parser.error(e)
+        except IndexError:
             parser.error('unknown chord "{}"'.format(args.notes[0]))
-        if args.minor:
-            args.notes = minorNotes(idx)
-            sup = 'Min'
-        elif args.seventh:
-            args.notes = seventhNotes(idx)
-            sup = '7'
-        elif args.aug:
-            args.notes = augNotes(idx)
-            sup = 'Aug'
-            print('Chord: {}{} -- {}\n'.format(
-                chord, sup, ', '.join(args.notes)))
-        else:
-            args.notes = majorNotes(idx)
-            print('n', idx, args.notes)
-            sup = 'Maj'
-
-        args.frets += 1
-        showNotes(args)
-
     elif sub == 'scale':
         scale = args.root.title()
         try:
