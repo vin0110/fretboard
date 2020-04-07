@@ -478,6 +478,9 @@ def main():
         'note',
         description="Show selected notes on the fretboard.",
         help='show named notes')
+    noteParser.add_argument('-w', '--whole', action='store_true',
+                            default=False,
+                            help='show only whole notes (default False)')
     noteParser.add_argument('notes', type=str, action='store', nargs="*",
                             help='pick notes (default: blank, all notes)')
 
@@ -552,8 +555,13 @@ def main():
     sub = args.sub
     if sub == 'note':
         if args.notes == []:
-            # no notes given. show all notes
-            args.notes = Notes
+            # no notes given
+            if args.whole:
+                # show whole notes
+                args.notes = ['A', 'B', 'C', 'D', 'E', 'F', 'G']
+            else:
+                # show all notes
+                args.notes = Notes
             print('Fretboard -- All notes\n')
         else:
             for i in range(len(args.notes)):
