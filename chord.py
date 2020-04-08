@@ -9,21 +9,8 @@ import argparse
 import logging
 import logging.handlers
 
-Notes = ['A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#']
-bNotes = ['A', 'Bb', 'B', 'C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab']
-nNotes = len(Notes)
 
-nextNote = lambda note, plus:\
-    Notes[(Notes.index(note.title()) + plus) % nNotes]
-
-
-def getNoteIdx(note):
-    '''returns index of note; raises ValueError if not found'''
-    note = note.title()
-    try:
-        return Notes.index(note)
-    except ValueError:
-        return bNotes.index(note)
+from notes import Notes, bNotes, nNotes, nextNote, getNoteIdx
 
 
 # diatonic major is WWHWWWH
@@ -57,6 +44,73 @@ def scale(args):
             print()
         note = (note + skip) % nNotes
         print('{} - {}'.format(i+1, notes[note]))
+
+
+def chord(args):
+    def chordNotes(root, notes, seq):
+        n = []
+        for l in seq:
+            n.append(notes[(root + l) % nNotes])
+        return ', '.join(n)
+
+
+    # which notes
+    if len(args.root) > 1 and args.root[1].lower() == 'b':
+        noteNames = bNotes
+    else:
+        noteNames = Notes
+
+    if args.minor:
+        scale = MinorScale
+    else:
+        scale = MajorScale
+
+    rootIdx = getNoteIdx(args.root)
+    x = rootIdx
+    notes = []
+    for l in scale[1:]:
+        notes.append(noteNames[x % nNotes])
+        x += l
+
+    print('Notes in the {}{} scale: {}'.format(args.root,
+                                               'm' if args.minor else '',
+                                               ', '.join(notes)))
+    print('Chords')
+
+    # format string: number, name, notes
+    fmt = '{:>5s} {:5s} {}'
+    if args.minor:
+        # minor
+        print(fmt.format("i", notes[0]+'m',
+                         chordNotes(rootIdx, noteNames, [0, 3, 7])))
+        print(fmt.format('ii0', notes[1]+'dim',
+                         chordNotes(rootIdx+2, noteNames, [0, 3, 6])))
+        print(fmt.format('III', notes[2],
+                         chordNotes(rootIdx+3, noteNames, [0, 4, 7])))
+        print(fmt.format("iv", notes[3]+'m',
+                         chordNotes(rootIdx+5, noteNames, [0, 3, 7])))
+        print(fmt.format("v", notes[4]+'m',
+                         chordNotes(rootIdx+7, noteNames, [0, 3, 7])))
+        print(fmt.format('VI', notes[5],
+                         chordNotes(rootIdx+8, noteNames, [0, 4, 7])))
+        print(fmt.format('VII', notes[6],
+                         chordNotes(rootIdx+10, noteNames, [0, 4, 7])))
+    else:
+        # major
+        print(fmt.format("I", notes[0],
+                         chordNotes(rootIdx, noteNames, [0, 4, 7])))
+        print(fmt.format('ii', notes[1]+'m',
+                         chordNotes(rootIdx+2, noteNames, [0, 3, 7])))
+        print(fmt.format('iii', notes[2]+'m',
+                         chordNotes(rootIdx+4, noteNames, [0, 3, 7])))
+        print(fmt.format("IV", notes[3],
+                         chordNotes(rootIdx+5, noteNames, [0, 4, 7])))
+        print(fmt.format("V", notes[4],
+                         chordNotes(rootIdx+7, noteNames, [0, 4, 7])))
+        print(fmt.format('vi', notes[5]+'m',
+                         chordNotes(rootIdx+9, noteNames, [0, 3, 7])))
+        print(fmt.format('vii0', notes[6]+'dim',
+                         chordNotes(rootIdx+11, noteNames, [0, 3, 6])))
 
 
 def main():
@@ -93,6 +147,17 @@ def main():
     scaleParser.add_argument('root', type=str, action='store',
                              help='scale root')
 
+    # subparser for chord
+    chordParser = subparsers.add_parser(
+        'chord',
+        description='Show chords.',
+        help='show chords')
+    chordParser.add_argument('--minor', '--min', '-m',
+                             action='store_true', default=False,
+                             help='show minor (default is major)')
+    chordParser.add_argument('root', type=str, action='store',
+                             help='chord root')
+
     args = parser.parse_args()
 
     logger = logging.getLogger()
@@ -118,6 +183,8 @@ def main():
     sub = args.sub
     if sub == 'scale':
         scale(args)
+    elif sub == 'chord':
+        chord(args)
     else:
         assert True, 'should not get here'
 

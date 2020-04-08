@@ -10,17 +10,12 @@ __author__ = "VW Freeh"
 import argparse
 from random import randint
 
+from notes import Notes, nNotes, nextNote, getNoteIdx, getNotes
 
 Roots = ['E', 'B', 'G', 'D', 'A', 'E']
-Notes = ['A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#']
-bNotes = ['A', 'Bb', 'B', 'C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab']
-nNotes = len(Notes)
 # these are the marks on the guitar neck
 Ticks = ['', '', '*', '', '*', '', '**', '', '*', '', '', '**',
          '', '', '*', '', '*']
-
-nextNote = lambda note, plus:\
-    Notes[(Notes.index(note.title()) + plus) % nNotes]
 
 # major scale: WWhWWWh
 # NOTE:   1 - 2 - 3 4 - 5 - 6  -  7  8
@@ -49,26 +44,6 @@ augNotes = lambda n:\
 # dim: 1, b3, b5 -- 0, 3, 6
 dimNotes = lambda n:\
     (Notes[n], Notes[(n+3) % nNotes], Notes[(n+6) % nNotes], )
-
-
-def getNoteIdx(note):
-    '''returns index of note; raises ValueError if not found'''
-    note = note.title()
-    try:
-        return Notes.index(note)
-    except ValueError:
-        return bNotes.index(note)
-
-
-def getNotes(pnotes, offset, frets):
-    notes = []
-    for i in range(frets):
-        note = Notes[(i+offset) % nNotes]
-        if note in pnotes:
-            notes.append(note)
-        else:
-            notes.append(' ')
-    return notes
 
 
 def showNotes(args):
@@ -172,7 +147,7 @@ def showCaged(root_name):
         d = 12
     '''
     frets = max(12, c+3, a+2, g+3, e+2, d+3) + 1
-    #print(root_name, root, a, e, d, frets)
+    # print(root_name, root, a, e, d, frets)
 
     print('CAGED for {} ---'.format(root_name),
           f'C:{c} A:{a} G:{g} E:{e} D:{d}')
