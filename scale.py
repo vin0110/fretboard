@@ -19,13 +19,15 @@ MajorScale = [0, 2, 2, 1, 2, 2, 2, 1]
 MinorScale = [0, 2, 1, 2, 2, 1, 2, 2]
 
 
-def scale(args):
+def showNotes(args):
     # args.logger.info(str(args))
     print('Notes in the {}{} scale'.format(args.root,
                                            'm' if args.minor else ''))
 
     # which notes
     if len(args.root) > 1 and args.root[1].lower() == 'b':
+        notes = bNotes
+    elif args.root.lower() == 'f':
         notes = bNotes
     else:
         notes = Notes
@@ -46,13 +48,12 @@ def scale(args):
         print('{} - {}'.format(i+1, notes[note]))
 
 
-def chord(args):
+def showChords(args):
     def chordNotes(root, notes, seq):
         n = []
         for l in seq:
             n.append(notes[(root + l) % nNotes])
         return ', '.join(n)
-
 
     # which notes
     if len(args.root) > 1 and args.root[1].lower() == 'b':
@@ -72,7 +73,7 @@ def chord(args):
         notes.append(noteNames[x % nNotes])
         x += l
 
-    print('Notes in the {}{} scale: {}'.format(args.root,
+    print('Notes in the {}{} scale: {}'.format(args.root.title(),
                                                'm' if args.minor else '',
                                                ', '.join(notes)))
     print('Chords')
@@ -115,7 +116,7 @@ def chord(args):
 
 def main():
     '''
-    blah, blah
+    show notes in a scale
     '''
     parser = argparse.ArgumentParser(description=main.__doc__)
     parser.add_argument('-d', '--debug', action="count",
@@ -125,38 +126,20 @@ def main():
     parser.add_argument('-l', '--logfile', type=str, default='-',
                         help='set log file (default stderr "-")')
 
-    subparsers = parser.add_subparsers(
-        title='subcommands',
-        description='valid subcommands',
-        dest='sub', )
-    subparsers.required = True
-
-    # subparser for scale
-    scaleParser = subparsers.add_parser(
-        'scale',
-        description='Show scales.',
-        help='show scales')
-    scaleParser.add_argument('--pentatonic', '--dia',
-                             action='store_true', default=False,
-                             help='show pentatonic scale (default: diatonic)')
-    scaleParser.add_argument('--minor', '--min', '-m',
-                             action='store_true', default=False,
-                             help='show minor (default is major)')
-    scaleParser.add_argument('--full', action='store_true', default=False,
+    parser.add_argument('--pentatonic', '--dia',
+                        action='store_true', default=False,
+                        help='show pentatonic scale (default: diatonic)')
+    parser.add_argument('--minor', '--min', '-m',
+                        action='store_true', default=False,
+                        help='show minor (default is major)')
+    parser.add_argument('--full', action='store_true', default=False,
                              help='show skipped notes (default=False)')
-    scaleParser.add_argument('root', type=str, action='store',
+    parser.add_argument('root', type=str, action='store',
                              help='scale root')
 
-    # subparser for chord
-    chordParser = subparsers.add_parser(
-        'chord',
-        description='Show chords.',
-        help='show chords')
-    chordParser.add_argument('--minor', '--min', '-m',
-                             action='store_true', default=False,
-                             help='show minor (default is major)')
-    chordParser.add_argument('root', type=str, action='store',
-                             help='chord root')
+    parser.add_argument('-c', '--chords', '--chord',
+                        action='store_true', default=False,
+                        help='show chords (default is notes)')
 
     args = parser.parse_args()
 
@@ -180,13 +163,10 @@ def main():
 
     setattr(args, 'logger', logger)
 
-    sub = args.sub
-    if sub == 'scale':
-        scale(args)
-    elif sub == 'chord':
-        chord(args)
+    if args.chords:
+        showChords(args)
     else:
-        assert True, 'should not get here'
+        showNotes(args)
 
 
 if __name__ == "__main__":
