@@ -78,13 +78,13 @@ def showTriads(root_name):
     a = (root + 9) % 12
     e = (root + 1) % 12
     d = (root + 4) % 12
-    if a == 0:
-        a = 12
+    if a < 2:
+        a += 12
     if e == 0:
         e = 12
     if d == 0:
         d = 12
-    frets = max(12, a, e+1, d+1) + 1
+    frets = max(12, a+3, e+1, d+3) + 1
 
     print('Triads for {}'.format(root_name))
     fret_str = ["%-2d" % (i, ) for i in range(frets)]
@@ -94,35 +94,42 @@ def showTriads(root_name):
 
     # print E (hi)
     notes = [' '] * frets
+    notes[a-2] = "A"
+    notes[a+3] = "G"
     notes[d] = "D"
     print("|".join([' {:2s} '.format(note) for note in notes]))
 
     # print B
     notes = [' '] * frets
-    notes[a] = "A"
-    notes[d+1] = "D"
+    notes[a] = "AG"
+    notes[d+1] = "DC"
     print("|".join([' {:2s} '.format(note) for note in notes]))
 
     # print G
     notes = [' '] * frets
-    notes[a] = "A"
+    notes[a] = "AG"
     notes[e] = "E"
-    notes[d] = "D"
+    notes[d] = "DC"
     print("|".join([' {:2s} '.format(note) for note in notes]))
 
     # print D
     notes = [' '] * frets
-    notes[a] = "A"
-    notes[e+1] = "E"
+    notes[a] = "AG"
+    notes[e+1] = "ED"
+    notes[d+2] = "C"
     print("|".join([' {:2s} '.format(note) for note in notes]))
 
     # print A
     notes = [' '] * frets
+    notes[a-2] = "A"
+    notes[a+2] = "G"
     notes[e+1] = "E"
+    notes[d+3] = "C"
     print("|".join([' {:2s} '.format(note) for note in notes]))
 
     # print E (lo)
     notes = [' '] * frets
+    notes[a+3] = "G"
     print("|".join([' {:2s} '.format(note) for note in notes]))
 
 
@@ -305,7 +312,10 @@ def box(args):
         print('All box scales for', args.root.upper())
 
         frets = 15
-        root = 12 - (Notes.index(args.root.upper()) + 5) % 12
+        try:
+            root = 12 - (Notes.index(args.root.upper()) + 5) % 12
+        except ValueError:
+            assert False,'invalid note "{}"'.format(args.root)
 
         print(" 0 ||" +
               "|".join([' {:-2d} '.format(i) for i in range(1, frets+1)]))
@@ -434,6 +444,48 @@ def chord(args):
     showNotes(args)
 
 
+CHROMATIC_NOTES = "C-D-EF-G-A-B"
+
+
+def panorama(args):
+    '''show panorama'''
+    def rotate(s, n):
+        return s[n:] + s[:n]
+
+    labels = [
+        'ROOT',
+        'b SECOND',
+        'SECOND',
+        'b THIRD',
+        'THIRD',
+        'FOURTH',
+        'dim FIFTH',
+        'FIFTH',
+        'aug FIFTH',
+        'SIXTH',
+        'b SEVENTH',
+        'SEVENTH',
+    ]
+
+    fmt = "{:10s} {:s}"
+    if args.minor:
+        notes = [0, 3, 7]
+    elif args.aug:
+        notes = [0, 4, 8]
+    elif args.dim:
+        notes = [0, 3, 6]
+    else:
+        notes = [0, 4, 7]       # major
+
+    if args.seventh:
+        notes.append(10)        # add flat seventh
+    elif args.major7:
+        notes.append(11)        # add seventh
+
+    for n in notes:
+        print(fmt.format(labels[n], rotate(CHROMATIC_NOTES, n)))
+
+
 def main():
     '''
     Show notes on guitar fret board by (1) note, (2), chord, or (3) scale.
@@ -469,7 +521,7 @@ def main():
                              help='show minor (default is major)')
     chordParser.add_argument('--seventh', '--7', '-7', action='store_true',
                              default=False,
-                             help='show major 7th')
+                             help='show dominapte 7th')
     chordParser.add_argument('--aug', '-a', action='store_true', default=False,
                              help='show augmented')
     chordParser.add_argument('--major7', '--maj7', '--M7', action='store_true',
@@ -480,6 +532,24 @@ def main():
                              help='show diminished')
     chordParser.add_argument('root', type=str, action='store',
                              help='chord root')
+
+    # subparser for pan
+    panParser = subparsers.add_parser(
+        'pan',
+        description='Show all the panorama for a chord.',
+        help='show chords')
+    panParser.add_argument('--minor', '--min', '--m', '-m',
+                           action='store_true', default=False,
+                           help='show minor (default is major)')
+    panParser.add_argument('--seventh', '--7', '-7', action='store_true',
+                           default=False,
+                           help='show dominate 7th')
+    panParser.add_argument('--aug', '-a', action='store_true', default=False,
+                           help='show augmented')
+    panParser.add_argument('--major7', '--maj7', '--M7', action='store_true',
+                           default=False, help='show major 7th')
+    panParser.add_argument('--dim', action='store_true', default=False,
+                           help='show diminished')
 
     # subparser for scale
     scaleParser = subparsers.add_parser(
@@ -619,7 +689,10 @@ def main():
         showNotes(args)
 
     elif sub == 'box':
-        box(args)
+        try:
+            box(args)
+        except AssertionError as e:
+            print("ERROR: ", e)
 
     elif sub == 'caged':
         if args.triads:
@@ -629,6 +702,8 @@ def main():
 
     elif sub == 'game':
         playNoteGame(args)
+    elif sub == 'pan':
+        panorama(args)
     else:
         if sub:
             print('unknown command: {}'.format(sub))
